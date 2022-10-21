@@ -82,14 +82,24 @@ function totalPrice(data, cartItem){
 
 function checkForm(){
   let regexStrings = /^[A-Za-z]{2,}$/;
+  let regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5})$/;
+  let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+  let contactObj = {
+    "firstName" : "prénom",
+    "lastName" : "nom",
+    "address" : "adresse",
+    "city" : "ville",
+    "email" : "email",
+  };
 
     let firstNameInput = document.getElementById("firstName");
     firstNameInput.addEventListener(
       "change",
-      function () {     
-    let firstName = firstNameInput.value;
-    let firstNameMsg = document.getElementById("firstNameErrorMsg");     
-        !regexStrings.test(firstName) ? firstNameMsg.innerHTML = "no man" : firstNameMsg.innerHTML = " " ; 
+      function () {       
+        let firstName = firstNameInput.value;
+        let firstNameMsg = document.getElementById("firstNameErrorMsg"); 
+        !regexStrings.test(firstName) ? firstNameMsg.innerHTML = "no man" : (firstNameMsg.innerHTML = " ") && (contactObj.firstName = firstName) ; 
       },
       false
     );
@@ -100,7 +110,7 @@ function checkForm(){
       function () {   
         let lastName = lastNameInput.value;
         let lastNameMsg = document.getElementById("lastNameErrorMsg");  
-        !regexStrings.test(lastName) ? lastNameMsg.innerHTML = "no man" : lastNameMsg.innerHTML = " " ; 
+        !regexStrings.test(lastName) ? lastNameMsg.innerHTML = "no man" : (lastNameMsg.innerHTML = " ") && (contactObj.lastName = lastName) ; 
       },
       false
     );
@@ -111,8 +121,7 @@ function checkForm(){
       function () {     
         let address = addressInput.value;
         let addressMsg = document.getElementById("addressErrorMsg");       
-        let regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5})$/;
-        !regexAddress.test(address) ? addressMsg.innerHTML = "Merci de saisir une adresse valide" : addressMsg.innerHTML = " " ; 
+        !regexAddress.test(address) ? addressMsg.innerHTML = "Merci de saisir une adresse valide" : (addressMsg.innerHTML = " ") && (contactObj.address = address)  ; 
       },
       false
     );
@@ -123,7 +132,7 @@ function checkForm(){
       function () {  
         let city = cityInput.value;
         let cityMsg = document.getElementById("cityErrorMsg");
-        !regexStrings.test(city) ? cityMsg.innerHTML = "no man" : cityMsg.innerHTML = " " ; 
+        !regexStrings.test(city) ? cityMsg.innerHTML = "no man" : (cityMsg.innerHTML = " ") && (contactObj.city = city)  ; 
       },
       false
     );
@@ -133,26 +142,34 @@ function checkForm(){
       "change",
       function () {       
         let email = emailInput.value;
-        let emailMsg = document.getElementById("emailErrorMsg");      
-        let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-        !regexEmail.test(email) ? emailMsg.innerHTML = "no man" : emailMsg.innerHTML = " " ; 
+        let emailMsg = document.getElementById("emailErrorMsg");           
+        !regexEmail.test(email) ? emailMsg.innerHTML = "no man" : (emailMsg.innerHTML = " ") && (contactObj.email = email)  ; 
       },
       false
     );
 
 
-    // let orderBtn = document.getElementById("order");
-    // orderBtn.addEventListener(
-    //   "click",
-    //   function () {
+    let orderBtn = document.getElementById("order");
+    orderBtn.addEventListener(
+      "click",
+      function (e) {
+        e.preventDefault();
 
-    //     if ( (checkAddress || checkCity || checkEmail || checkFirstName || checkLastName ) = false){
-    //       alert("Merci de renseigner le formulaire correctement");
-    //     };
+        console.log("contactObj :");
+        console.table(contactObj);
 
-    //   },
-    //   false
-    // );
+        
+        if((!regexStrings.test(firstNameInput.value)) || (!regexStrings.test(lastNameInput.value)) || (!regexAddress.test(addressInput.value)) || (!regexStrings.test(cityInput.value)) || (!regexEmail.test(emailInput.value)) ){
+          alert("Merci de renseigner le formulaire correctement");
+        }
+
+        // if ( (checkAddress || checkCity || checkEmail || checkFirstName || checkLastName ) = false){
+        //   alert("Merci de renseigner le formulaire correctement");
+        // };
+
+      },
+      false
+    );
 }
 
 
