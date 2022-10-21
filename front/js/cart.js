@@ -104,7 +104,7 @@ function checkForm(){
       function () {       
         let firstName = firstNameInput.value;
         let firstNameMsg = document.getElementById("firstNameErrorMsg"); 
-        !regexStrings.test(firstName) ? firstNameMsg.innerHTML = "no man" : (firstNameMsg.innerHTML = " ") && (contactObj.firstName = firstName) ; 
+        !regexStrings.test(firstName) ? firstNameMsg.innerHTML = "Le prénom ne doit contenir que des lettres (minimum 2)" : (firstNameMsg.innerHTML = " ") && (contactObj.firstName = firstName) ; 
       },
       false
     );
@@ -115,7 +115,7 @@ function checkForm(){
       function () {   
         let lastName = lastNameInput.value;
         let lastNameMsg = document.getElementById("lastNameErrorMsg");  
-        !regexStrings.test(lastName) ? lastNameMsg.innerHTML = "no man" : (lastNameMsg.innerHTML = " ") && (contactObj.lastName = lastName) ; 
+        !regexStrings.test(lastName) ? lastNameMsg.innerHTML = "Le nom ne doit contenir que des lettres (minimum 2)" : (lastNameMsg.innerHTML = " ") && (contactObj.lastName = lastName) ; 
       },
       false
     );
@@ -137,7 +137,7 @@ function checkForm(){
       function () {  
         let city = cityInput.value;
         let cityMsg = document.getElementById("cityErrorMsg");
-        !regexStrings.test(city) ? cityMsg.innerHTML = "no man" : (cityMsg.innerHTML = " ") && (contactObj.city = city)  ; 
+        !regexStrings.test(city) ? cityMsg.innerHTML = "La ville ne doit contenir que des lettres (minimum 2)" : (cityMsg.innerHTML = " ") && (contactObj.city = city)  ; 
       },
       false
     );
@@ -148,7 +148,7 @@ function checkForm(){
       function () {       
         let email = emailInput.value;
         let emailMsg = document.getElementById("emailErrorMsg");           
-        !regexEmail.test(email) ? emailMsg.innerHTML = "no man" : (emailMsg.innerHTML = " ") && (contactObj.email = email)  ; 
+        !regexEmail.test(email) ? emailMsg.innerHTML = "Merci de saisir une adresse email valide (ex: xyz@email.com)" : (emailMsg.innerHTML = " ") && (contactObj.email = email)  ; 
       },
       false
     );
@@ -194,9 +194,6 @@ function checkForm(){
           });
 
         }
-
-       
-
       },
       false
     );
