@@ -169,6 +169,10 @@ function checkForm(){
 
           alert("Merci de renseigner le formulaire correctement");
 
+        } else if (productsArray.length === 0) {
+
+          alert("Vous n'avez pas d'article dans votre panier");
+       
         } else {
 
           fetch("http://localhost:3000/api/products/order", {
@@ -290,7 +294,13 @@ function createCartElement(value, cartItem, index) {
       }
     })
     .then((response) => {
-         
+
+      if (cartInfos.length === 0){
+        let emptyCartMsg = document.querySelector("h1");
+        emptyCartMsg.innerHTML= "Le panier est vide";
+        console.log("le panier est vide");
+      } else {
+
         for(let i=0; i <cartInfos.length ; i++){
           let id = cartInfos[i].id;                 
 
@@ -301,7 +311,14 @@ function createCartElement(value, cartItem, index) {
             }
           })
           .then((value) => { 
-              createCartElement(value, cartInfos[i], i);          
+
+            
+
+            
+              createCartElement(value, cartInfos[i], i);  
+
+            
+                      
           })
           .catch(function (err) {
             // Une erreur est survenue
@@ -310,6 +327,10 @@ function createCartElement(value, cartItem, index) {
           totalPrice(response, cartInfos[i]);
 
         }
+
+      }
+         
+        
       
      
     })
