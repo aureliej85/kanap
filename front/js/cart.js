@@ -151,12 +151,10 @@ function refreshTotalPrice(value, cartItem, newQty){
   }
   let spanTotalPrice = document.getElementById("totalPrice");
   spanTotalPrice.innerHTML = newTotalPrice;
-
-
 }
 
 /**
- * Display total Price 
+ * Display total Article 
  * @param {*} cartInfos 
  */
 function totalArticle(cartInfos){
@@ -169,10 +167,16 @@ function totalArticle(cartInfos){
 
 }
 
+/**
+ * Check all the fields in the form and 
+ * create the contact object and products Array
+ * when clicking on "commander" button
+ */
 function checkForm() {
   let regexStrings = /^[A-Za-z]{2,}$/;
   let regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5})$/;
-  let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,5}$/;
+  let regexCity = /^[a-zA-Z',.\s-]{2,50}$/;
 
   let productsArray = [];
   for (let i = 0; i < cartInfos.length; i++) {
@@ -232,7 +236,7 @@ function checkForm() {
     function () {
       let city = cityInput.value;
       let cityMsg = document.getElementById("cityErrorMsg");
-      !regexStrings.test(city)
+      !regexCity.test(city)
         ? (cityMsg.innerHTML =
             "La ville ne doit contenir que des lettres (minimum 2)")
         : (cityMsg.innerHTML = " ") && (contactObj.city = city);
