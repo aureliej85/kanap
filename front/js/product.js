@@ -1,3 +1,10 @@
+var existingEntries = JSON.parse(localStorage.getItem("allEntries"));
+if (existingEntries == null) existingEntries = [];
+
+/**
+ * Display product detail in Product page
+ * @param {*} value The Fetch response
+ */
 function displayProduct(value) {
   let image = `<img src="${value.imageUrl}" alt="${value.altText}"></img>`;
   document.getElementsByClassName("item__img")[0].innerHTML = image;
@@ -20,70 +27,81 @@ function displayProduct(value) {
   }
 }
 
-function addEntry() {
-  var existingEntries = JSON.parse(localStorage.getItem("allEntries"));
-  if (existingEntries == null) existingEntries = [];
-
-  // On récupère les valeurs saisies couleur et quantité
+/**
+ * Save options (color and quantity) in localStorage (allEntries)
+ */
+function saveOptions() {
   var colorPick = document.getElementById("colors").value;
   var qtyPick = document.getElementById("quantity").value;
-  var entry = {
+
+  var productObj = {
     id: id,
     color: colorPick,
     qty: Number(qtyPick),
   };
 
-  localStorage.setItem("entry", JSON.stringify(entry));
+  localStorage.setItem("productObj", JSON.stringify(productObj));
 
-  console.table(existingEntries);
-
-  // Condition pour mettre à jour la couleur et la quantité si même id sinon aouter nouveau produit
+  // Add productObj to localStorage (existingEntries)
   if (existingEntries == null) {
     existingEntries = [];
-    existingEntries.push(entry);
+    existingEntries.push(productObj);
     localStorage.setItem("allEntries", JSON.stringify(existingEntries));
   } else {
-    let get_article = existingEntries.find(
-      (cart_product) =>
-        entry.id == cart_product.id && entry.color == cart_product.color
+    let findProduct = existingEntries.find(
+      (cartProduct) =>
+        productObj.id == cartProduct.id && productObj.color == cartProduct.color
     );
-    if (get_article) {
-      let nb = Number(entry.qty) + Number(get_article.qty);
-      if (nb < 101) {
-        get_article.qty = nb;
+    if (findProduct) {
+      // add (sum) quantities If same id and same color and update localStorage (allentries)
+      let nb = Number(productObj.qty) + Number(findProduct.qty);
+      
+        findProduct.qty = nb;
         localStorage.setItem("allEntries", JSON.stringify(existingEntries));
-      } else {
-        return false;
-      }
+     
     } else {
-      existingEntries.push(entry);
+      existingEntries.push(productObj);
       localStorage.setItem("allEntries", JSON.stringify(existingEntries));
     }
   }
   return true;
 }
 
-let id = new URLSearchParams(window.location.search).get("id");
+/**
+ * Click on "add to cart" button with an eventListener,
+ * Save options (saveOptions function) and
+ * redirection to cart page
+ */
+function addBtn() {
+  const bouton = document.getElementById("addToCart");
+  bouton.addEventListener(
+    "click",
+    function () {
+      let qtyInput = document.getElementById('quantity').value ;
+      if(parseInt(qtyInput) > 100){
+        alert("SVP, entrez une quantité inférieure à 100.");
+      } else {
+      saveOptions();
+      location.href = "http://127.0.0.1:5500/front/html/cart.html";
+      }     
+    },
+    false
+  );
+}
 
+// Fetch product details from API to display product
+let id = new URLSearchParams(window.location.search).get("id");
 fetch("http://localhost:3000/api/products/" + id)
   .then(function (res) {
     if (res.ok) {
       return res.json();
     }
   })
-  .then((value) => {
-    displayProduct(value);
-
-    const bouton = document.getElementById("addToCart");
-    bouton.addEventListener(
-      "click",
-      function () {
-        addEntry();
-        location.href = "http://127.0.0.1:5500/front/html/cart.html";
-      },
-      false
-    );
+  .then((dataResponse) => {
+    displayProduct(dataResponse);
   })
   .catch(function (err) {
-    console.log("Une erreur est survenue");
+    console.log("Une erreur est survenue: " + err);
   });
+
+addBtn();

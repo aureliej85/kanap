@@ -3,8 +3,9 @@ let cartInfos = JSON.parse(lsProducts);
 console.table(cartInfos);
 let productsInCart = [];
 
+
 /**
- * Delete product from cart and localStorage, then reload
+ * Delete product from cart and localStorage
  * @param {string} idProduct from localStorage (cartInfos)
  * @param {string} colorProduct from localStorage (cartInfos)
  * @param {*} index 
@@ -22,11 +23,15 @@ function deleteEntry(idProduct, colorProduct, index) {
   item = JSON.stringify(cartInfos);
   localStorage.setItem("allEntries", item);
 
-  location.reload();
+  let thisArticle = document.querySelector(`[data-id='${idProduct}']`);
+  thisArticle.remove();
+
+  //location.reload();
 }
 
+
 /**
- * Update the quantity of a product in the cart and localStorage, then reload
+ * Update the quantity of a product in the cart and localStorage
  * @param {*} idProduct 
  * @param {*} colorProduct 
  * @param {*} qtyProduct 
@@ -40,6 +45,7 @@ function changeQuantity(
   newQtyProduct,
   index
 ) {
+
   let findProduct = cartInfos.find(
     (cart_product) =>
       idProduct == cart_product.id && colorProduct == cart_product.color
@@ -54,7 +60,8 @@ function changeQuantity(
   item = JSON.stringify(cartInfos);
   localStorage.setItem("allEntries", item);
 
-  location.reload();
+  //location.reload();
+  
 }
 
 /**
@@ -71,6 +78,7 @@ function totalPrice(data, cartItem) {
     priceObject["price"] = item.price;
     return priceObject;
   });
+  console.log('pricesArray');
   console.table(pricesArray);
 
  // Find product price thanks to "currentIndex"
@@ -78,13 +86,15 @@ function totalPrice(data, cartItem) {
   let currentIndex = pricesArray.findIndex((product) => {
     return product.key == cartItem.id;
   });
-
   let itemInCart = {};
 
   itemInCart["id"] = cartItem.id;
   itemInCart["color"] = cartItem.color;
   itemInCart["price"] = cartItem.qty * pricesArray[currentIndex].price;
   productsInCart.push(itemInCart);
+
+  console.log('productsInCart');
+  console.table(productsInCart);
 
 // Add all price*qty value pushed in productsInCart array
   var totalPrice = 0;
@@ -95,6 +105,68 @@ function totalPrice(data, cartItem) {
 // Insert total price inside the DOM
   let spanTotalPrice = document.getElementById("totalPrice");
   spanTotalPrice.innerHTML = totalPrice;
+}
+
+/**
+ * update Total Price after deleting a product
+ * @param {*} data 
+ * @param {*} cartItem 
+ * @param {*} index 
+ */
+function updateTotalPrice(data, cartItem, index){
+ 
+  let newProductsInCart = productsInCart.filter((product) => {
+    return product.key == cartItem.id;
+   });
+  
+ productsInCart.splice(index, 1);
+  console.log('productsInCart after delete smt :');
+  console.table(productsInCart);
+
+  var newTotalPrice = 0;
+  for (let j = 0; j < productsInCart.length ; j ++) {
+    newTotalPrice += productsInCart[j].price;
+  }
+
+// Refresh new total price inside the DOM
+  let spanTotalPrice = document.getElementById("totalPrice");
+  spanTotalPrice.innerHTML = newTotalPrice;
+
+}
+
+/**
+ * Refreh total price after quantity change
+ * @param {*} data 
+ * @param {*} cartItem 
+ * @param {*} index 
+ */
+function refreshTotalPrice(value, cartItem, newQty){
+  let newTotalPrice = 0;
+  for (let findPrice in productsInCart){
+    if(productsInCart[findPrice].id == cartItem.id){
+      productsInCart[findPrice].qty = parseInt(newQty);
+      productsInCart[findPrice].price = value.price * parseInt(newQty);
+    }
+    newTotalPrice += productsInCart[findPrice].price;
+  }
+  let spanTotalPrice = document.getElementById("totalPrice");
+  spanTotalPrice.innerHTML = newTotalPrice;
+
+
+}
+
+/**
+ * Display total Price 
+ * @param {*} cartInfos 
+ */
+function totalArticle(cartInfos){
+  var totalQty = 0;
+  for (var property in cartInfos) {
+    totalQty += cartInfos[property].qty;
+  }
+  let spanTotalQty = document.getElementById("totalQuantity");
+  spanTotalQty.innerHTML = totalQty;
+
 }
 
 function checkForm() {
@@ -226,11 +298,13 @@ function checkForm() {
   );
 }
 
-function createCartElement(value, cartItem, index) {
+
+function createCartElement(value, cartItem, index, data) {
   let article = document.createElement("article");
   article.setAttribute("class", "cart__item");
   article.setAttribute("data-id", cartItem.id);
   article.setAttribute("data-color", cartItem.color);
+  article.setAttribute("id", "testons");
 
   let divImage = document.createElement("div");
   divImage.setAttribute("class", "cart__item__img");
@@ -242,7 +316,7 @@ function createCartElement(value, cartItem, index) {
   let divDescr = document.createElement("div");
   divDescr.setAttribute("class", "cart__item__content__description");
 
-  divDescr.innerHTML = `<h2>${value.name}</h2> <br> <p>${cartItem.color}</p> <br> <p>${value.price}</p>`;
+  divDescr.innerHTML = `<h2>${value.name}</h2> <br> <p>${cartItem.color}</p> <br> <p>${value.price} €</p>`;
 
   let divSettings = document.createElement("div");
   divSettings.setAttribute("class", "cart__item__content__settings");
@@ -263,8 +337,18 @@ function createCartElement(value, cartItem, index) {
     "change",
     function () {
       let newQty = inputQuantity.value;
+      if ((newQty > 100) || (newQty < 1)){
+        alert('Merci de renseigner une quantité entre 0 et 100');
+      
+      } else {
       changeQuantity(cartItem.id, cartItem.color, cartItem.qty, newQty, index);
-      alert("La quantité a bien été modifiée");
+      totalArticle(cartInfos);
+      refreshTotalPrice(value, cartItem, newQty);
+     
+      console.log('productIncart after change qty');
+      console.table(productsInCart);
+      }
+          
     },
     false
   );
@@ -279,6 +363,11 @@ function createCartElement(value, cartItem, index) {
     "click",
     function () {
       deleteEntry(cartItem.id, cartItem.color, index);
+      totalArticle(cartInfos);
+      //totalPrice(data, cartItem);
+      updateTotalPrice(data, cartItem, index);
+
+      
     },
     false
   );
@@ -295,13 +384,6 @@ function createCartElement(value, cartItem, index) {
   divSettings.append(divSetDelete);
   divSetDelete.append(pDelete);
 
-  // TOTAL ARTICLES
-  var totalQty = 0;
-  for (var property in cartInfos) {
-    totalQty += cartInfos[property].qty;
-  }
-  let spanTotalQty = document.getElementById("totalQuantity");
-  spanTotalQty.innerHTML = totalQty;
 }
 
 
@@ -331,12 +413,13 @@ fetch("http://localhost:3000/api/products/")
             }
           })
           .then((dataResponse) => {
-            createCartElement(dataResponse, cartInfos[i], i);
+            createCartElement(dataResponse, cartInfos[i], i, responseProducts);
           })
           .catch(function (err) {
             console.log("Une erreur est survenue: " + err);
           });
 
+        totalArticle(cartInfos);
         totalPrice(responseProducts, cartInfos[i]);
       }
     }
@@ -346,3 +429,5 @@ fetch("http://localhost:3000/api/products/")
   });
 
 checkForm();
+
+

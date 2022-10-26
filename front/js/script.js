@@ -1,5 +1,9 @@
-function displayProducts(value){
-    for (let products of value ) {
+/**
+ * Display all products in HomePage
+ * @param {*} data The Fetch response
+ */
+function displayProducts(data){
+    for (let products of data ) {
 
         let link = document.createElement("a");
         let urlLink = `./product.html?id=${products._id}`;
@@ -25,18 +29,18 @@ function displayProducts(value){
 }
 
 
+// Fetch products from API
 fetch("http://localhost:3000/api/products")
   .then(function(res) {
     if (res.ok) {
       return res.json();
     }
   })
-  .then((value) => {
-    console.table(value);
-    displayProducts(value);
+  .then((dataResponse) => {
+    displayProducts(dataResponse);
   })
   .catch(function(err) {
-    console.log("Une erreur est survenue");
+    console.log("Une erreur est survenue: " + err);
   });
     
 
