@@ -3,12 +3,11 @@ let cartInfos = JSON.parse(lsProducts);
 console.table(cartInfos);
 let productsInCart = [];
 
-
 /**
  * Delete product from cart and localStorage
  * @param {string} idProduct from localStorage (cartInfos)
  * @param {string} colorProduct from localStorage (cartInfos)
- * @param {*} index 
+ * @param {*} index
  */
 function deleteEntry(idProduct, colorProduct, index) {
   let findProduct = cartInfos.find(
@@ -29,14 +28,13 @@ function deleteEntry(idProduct, colorProduct, index) {
   //location.reload();
 }
 
-
 /**
  * Update the quantity of a product in the cart and localStorage
- * @param {*} idProduct 
- * @param {*} colorProduct 
- * @param {*} qtyProduct 
- * @param {*} newQtyProduct 
- * @param {*} index 
+ * @param {*} idProduct
+ * @param {*} colorProduct
+ * @param {*} qtyProduct
+ * @param {*} newQtyProduct
+ * @param {*} index
  */
 function changeQuantity(
   idProduct,
@@ -45,7 +43,6 @@ function changeQuantity(
   newQtyProduct,
   index
 ) {
-
   let findProduct = cartInfos.find(
     (cart_product) =>
       idProduct == cart_product.id && colorProduct == cart_product.color
@@ -59,15 +56,12 @@ function changeQuantity(
 
   item = JSON.stringify(cartInfos);
   localStorage.setItem("allEntries", item);
-
-  //location.reload();
-  
 }
 
 /**
  * Sum the prices and add to the DOM
- * @param {*} data 
- * @param {*} cartItem 
+ * @param {*} data
+ * @param {*} cartItem
  */
 function totalPrice(data, cartItem) {
   // Map ids and prices from API Products (Fetch :responseProducts)
@@ -78,11 +72,11 @@ function totalPrice(data, cartItem) {
     priceObject["price"] = item.price;
     return priceObject;
   });
-  console.log('pricesArray');
+  console.log("pricesArray");
   console.table(pricesArray);
 
- // Find product price thanks to "currentIndex"
- // Create new object with price*qty value (push in productsInCart array)
+  // Find product price thanks to "currentIndex"
+  // Create new object with price*qty value (push in productsInCart array)
   let currentIndex = pricesArray.findIndex((product) => {
     return product.key == cartItem.id;
   });
@@ -93,57 +87,55 @@ function totalPrice(data, cartItem) {
   itemInCart["price"] = cartItem.qty * pricesArray[currentIndex].price;
   productsInCart.push(itemInCart);
 
-  console.log('productsInCart');
+  console.log("productsInCart");
   console.table(productsInCart);
 
-// Add all price*qty value pushed in productsInCart array
-  var totalPrice = 0;
-  for (var property in productsInCart) {
+  // Add all price*qty value pushed in productsInCart array
+  let totalPrice = 0;
+  for (let property in productsInCart) {
     totalPrice += productsInCart[property].price;
   }
 
-// Insert total price inside the DOM
+  // Insert total price inside the DOM
   let spanTotalPrice = document.getElementById("totalPrice");
   spanTotalPrice.innerHTML = totalPrice;
 }
 
 /**
  * update Total Price after deleting a product
- * @param {*} data 
- * @param {*} cartItem 
- * @param {*} index 
+ * @param {*} data
+ * @param {*} cartItem
+ * @param {*} index
  */
-function updateTotalPrice(data, cartItem, index){
- 
+function updateTotalPrice(data, cartItem, index) {
   let newProductsInCart = productsInCart.filter((product) => {
     return product.key == cartItem.id;
-   });
-  
- productsInCart.splice(index, 1);
-  console.log('productsInCart after delete smt :');
+  });
+
+  productsInCart.splice(index, 1);
+  console.log("productsInCart after delete smt :");
   console.table(productsInCart);
 
-  var newTotalPrice = 0;
-  for (let j = 0; j < productsInCart.length ; j ++) {
+  let newTotalPrice = 0;
+  for (let j = 0; j < productsInCart.length; j++) {
     newTotalPrice += productsInCart[j].price;
   }
 
-// Refresh new total price inside the DOM
+  // Refresh new total price inside the DOM
   let spanTotalPrice = document.getElementById("totalPrice");
   spanTotalPrice.innerHTML = newTotalPrice;
-
 }
 
 /**
  * Refreh total price after quantity change
- * @param {*} data 
- * @param {*} cartItem 
- * @param {*} index 
+ * @param {*} data
+ * @param {*} cartItem
+ * @param {*} index
  */
-function refreshTotalPrice(value, cartItem, newQty){
+function refreshTotalPrice(value, cartItem, newQty) {
   let newTotalPrice = 0;
-  for (let findPrice in productsInCart){
-    if(productsInCart[findPrice].id == cartItem.id){
+  for (let findPrice in productsInCart) {
+    if (productsInCart[findPrice].id == cartItem.id) {
       productsInCart[findPrice].qty = parseInt(newQty);
       productsInCart[findPrice].price = value.price * parseInt(newQty);
     }
@@ -154,35 +146,65 @@ function refreshTotalPrice(value, cartItem, newQty){
 }
 
 /**
- * Display total Article 
- * @param {*} cartInfos 
+ * Display total Article
+ * @param {*} cartInfos
  */
-function totalArticle(cartInfos){
-  var totalQty = 0;
-  for (var property in cartInfos) {
+function totalArticle(cartInfos) {
+  let totalQty = 0;
+  for (let property in cartInfos) {
     totalQty += cartInfos[property].qty;
   }
   let spanTotalQty = document.getElementById("totalQuantity");
   spanTotalQty.innerHTML = totalQty;
-
 }
 
+
 /**
- * Check all the fields in the form and 
- * create the contact object and products Array
- * when clicking on "commander" button
+ * POST request with a contact object and a products array
+ * @param {*} contactObj 
+ * @param {*} productsArray 
  */
-function checkForm() {
+function postContact(contactObj, productsArray){
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contact: contactObj,
+      products: productsArray,
+    }),
+  }).then(async (responseProducts) => {
+    try {
+      let respOrder = await responseProducts.json();
+      let orderId = respOrder.orderId;
+      localStorage.clear();
+      window.location.assign("confirmation.html?orderId=" + orderId);
+      console.log("responseProducts du POST");
+      console.table(responseProducts);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+}
+
+
+/**
+ * check the fields to validate the order
+ */
+function checkOrder() {
   let regexStrings = /^[A-Za-z]{2,}$/;
   let regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5})$/;
   let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,5}$/;
   let regexCity = /^[a-zA-Z',.\s-]{2,50}$/;
 
+  // Create product array
   let productsArray = [];
   for (let i = 0; i < cartInfos.length; i++) {
     productsArray.push(cartInfos[i].id);
   }
 
+  // create contact object
   let contactObj = {
     firstName: "prénom",
     lastName: "nom",
@@ -197,7 +219,10 @@ function checkForm() {
     function () {
       let firstName = firstNameInput.value;
       let firstNameMsg = document.getElementById("firstNameErrorMsg");
-      !regexStrings.test(firstName) ? (firstNameMsg.innerHTML ="Le prénom ne doit contenir que des lettres (minimum 2)") : (firstNameMsg.innerHTML = " ") && (contactObj.firstName = firstName);
+      !regexStrings.test(firstName)
+        ? (firstNameMsg.innerHTML =
+            "Le prénom ne doit contenir que des lettres (minimum 2)")
+        : (firstNameMsg.innerHTML = " ") && (contactObj.firstName = firstName);
     },
     false
   );
@@ -258,44 +283,24 @@ function checkForm() {
     false
   );
 
+
   let orderBtn = document.getElementById("order");
   orderBtn.addEventListener(
     "click",
     function (e) {
       e.preventDefault();
-
       if (
         !regexStrings.test(firstNameInput.value) ||
         !regexStrings.test(lastNameInput.value) ||
         !regexAddress.test(addressInput.value) ||
-        !regexStrings.test(cityInput.value) ||
+        !regexCity.test(cityInput.value) ||
         !regexEmail.test(emailInput.value)
       ) {
         alert("Merci de renseigner le formulaire correctement");
       } else if (productsArray.length === 0) {
         alert("Vous n'avez pas d'article dans votre panier");
       } else {
-        fetch("http://localhost:3000/api/products/order", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contact: contactObj,
-            products: productsArray,
-          }),
-        }).then(async (responseProducts) => {
-          try {
-            let respOrder = await responseProducts.json();
-            let orderId = respOrder.orderId;
-            localStorage.clear();
-            window.location.assign("confirmation.html?orderId=" + orderId);
-            console.log("responseProducts du POST");
-            console.table(responseProducts);
-          } catch (e) {
-            console.log(e);
-          }
-        });
+        postContact(contactObj, productsArray);
       }
     },
     false
@@ -303,12 +308,18 @@ function checkForm() {
 }
 
 
+/**
+ * Create each element (product) from the cart
+ * @param {*} value
+ * @param {*} cartItem
+ * @param {*} index
+ * @param {*} data
+ */
 function createCartElement(value, cartItem, index, data) {
   let article = document.createElement("article");
   article.setAttribute("class", "cart__item");
   article.setAttribute("data-id", cartItem.id);
   article.setAttribute("data-color", cartItem.color);
-  article.setAttribute("id", "testons");
 
   let divImage = document.createElement("div");
   divImage.setAttribute("class", "cart__item__img");
@@ -341,18 +352,22 @@ function createCartElement(value, cartItem, index, data) {
     "change",
     function () {
       let newQty = inputQuantity.value;
-      if ((newQty > 100) || (newQty < 1)){
-        alert('Merci de renseigner une quantité entre 0 et 100');
-      
+      if (newQty > 100 || newQty < 1) {
+        alert("Merci de renseigner une quantité entre 0 et 100");
       } else {
-      changeQuantity(cartItem.id, cartItem.color, cartItem.qty, newQty, index);
-      totalArticle(cartInfos);
-      refreshTotalPrice(value, cartItem, newQty);
-     
-      console.log('productIncart after change qty');
-      console.table(productsInCart);
+        changeQuantity(
+          cartItem.id,
+          cartItem.color,
+          cartItem.qty,
+          newQty,
+          index
+        );
+        totalArticle(cartInfos);
+        refreshTotalPrice(value, cartItem, newQty);
+
+        console.log("productIncart after change qty");
+        console.table(productsInCart);
       }
-          
     },
     false
   );
@@ -370,8 +385,6 @@ function createCartElement(value, cartItem, index, data) {
       totalArticle(cartInfos);
       //totalPrice(data, cartItem);
       updateTotalPrice(data, cartItem, index);
-
-      
     },
     false
   );
@@ -387,30 +400,17 @@ function createCartElement(value, cartItem, index, data) {
   divSetQty.append(inputQuantity);
   divSettings.append(divSetDelete);
   divSetDelete.append(pDelete);
-
 }
 
-
-// Fetch all products from API
-fetch("http://localhost:3000/api/products/")
-  .then(function (res) {
-    if (res.ok) {
-      return res.json();
-    }
-  })
-  .then((responseProducts) => {
-    if (cartInfos.length === 0) {
-
-      let emptyCartMsg = document.querySelector("h1");
-      emptyCartMsg.innerHTML = "Le panier est vide";
-
-    } else {
-      
-      for (let i = 0; i < cartInfos.length; i++) {
-        let id = cartInfos[i].id;
-
-        // Fetch product details from API
-        fetch("http://localhost:3000/api/products/" + id)
+/**
+ * Fetch product details from API
+ * @param {*} id 
+ * @param {*} cartInfos 
+ * @param {*} i 
+ * @param {*} responseProducts 
+ */
+function fetchProductDetails(id, cartInfos, i, responseProducts ){
+  fetch("http://localhost:3000/api/products/" + id)
           .then(function (res) {
             if (res.ok) {
               return res.json();
@@ -422,7 +422,23 @@ fetch("http://localhost:3000/api/products/")
           .catch(function (err) {
             console.log("Une erreur est survenue: " + err);
           });
+}
 
+// Fetch all products from API
+fetch("http://localhost:3000/api/products/")
+  .then(function (res) {
+    if (res.ok) {
+      return res.json();
+    }
+  })
+  .then((responseProducts) => {
+    if (cartInfos.length === 0) {
+      let emptyCartMsg = document.querySelector("h1");
+      emptyCartMsg.innerHTML = "Le panier est vide";
+    } else {
+      for (let i = 0; i < cartInfos.length; i++) {
+        let id = cartInfos[i].id;
+        fetchProductDetails(id, cartInfos, i, responseProducts );
         totalArticle(cartInfos);
         totalPrice(responseProducts, cartInfos[i]);
       }
@@ -432,6 +448,4 @@ fetch("http://localhost:3000/api/products/")
     console.log("Une erreur est survenue: " + err);
   });
 
-checkForm();
-
-
+checkOrder();

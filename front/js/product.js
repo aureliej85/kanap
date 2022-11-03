@@ -1,4 +1,4 @@
-var existingEntries = JSON.parse(localStorage.getItem("allEntries"));
+let existingEntries = JSON.parse(localStorage.getItem("allEntries"));
 if (existingEntries == null) existingEntries = [];
 
 /**
@@ -6,7 +6,7 @@ if (existingEntries == null) existingEntries = [];
  * @param {*} value The Fetch response
  */
 function displayProduct(value) {
-  let image = `<img src="${value.imageUrl}" alt="${value.altText}"></img>`;
+  let image = `<img src="${value.imageUrl}" alt="${value.altText}"/>`;
   document.getElementsByClassName("item__img")[0].innerHTML = image;
 
   let title = value.name;
@@ -31,10 +31,10 @@ function displayProduct(value) {
  * Save options (color and quantity) in localStorage (allEntries)
  */
 function saveOptions() {
-  var colorPick = document.getElementById("colors").value;
-  var qtyPick = document.getElementById("quantity").value;
+  let colorPick = document.getElementById("colors").value;
+  let qtyPick = document.getElementById("quantity").value;
 
-  var productObj = {
+  let productObj = {
     id: id,
     color: colorPick,
     qty: Number(qtyPick),
@@ -82,7 +82,8 @@ function addBtn() {
         alert("SVP, entrez une quantité inférieure à 100.");
       } else {
       saveOptions();
-      location.href = "http://127.0.0.1:5500/front/html/cart.html";
+      //location.href = "http://127.0.0.1:5500/front/html/cart.html";
+      alert("Le panier a été mis à jour !");
       }     
     },
     false
